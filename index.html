@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Which BioProtocol Element Are You?</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 50%, #2d1b69 100%);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: linear-gradient(45deg, #00f5ff, #8a2be2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 30px rgba(0, 245, 255, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        .logo img {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #00f5ff, #8a2be2, #ff6b35);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 20px rgba(0, 245, 255, 0.5);
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            opacity: 0.8;
+            margin-bottom: 30px;
+        }
+
+        .quiz-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            animation: fadeInUp 1s ease-out;
+            margin-bottom: 40px;
+        }
+
+        .question {
+            display: none;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .question.active {
+            display: block;
+        }
+
+        .question h3 {
+            font-size: 1.5em;
+            margin-bottom: 25px;
+            text-align: center;
+            color: #00f5ff;
+        }
+
+        .options {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .option {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid transparent;
+            border-radius: 15px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .option:hover {
+            background: rgba(0, 245, 255, 0.2);
+            border-color: #00f5ff;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 245, 255, 0.3);
+        }
+
+        .option.selected {
+            background: rgba(138, 43, 226, 0.3);
+            border-color: #8a2be2;
+            transform: scale(1.02);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00f5ff, #8a2be2);
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #00f5ff, #8a2be2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 20px auto 0;
+            box-shadow: 0 4px 15px rgba(0, 245, 255, 0.4);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 245, 255, 0.6);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result {
+            display: none;
+            text-align: center;
+            animation: zoomIn 1s ease-out;
+        }
+
+        .element-card {
+            background: linear-gradient(135deg, rgba(0, 245, 255, 0.2), rgba(138, 43, 226, 0.2));
+            border-radius: 20px;
+            padding: 40px;
+            margin: 30px 0;
+            border: 2px solid rgba(0, 245, 255, 0.5);
+            box-shadow: 0 0 40px rgba(0, 245, 255, 0.3);
+        }
+
+        .element-name {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-shadow: 0 0 20px currentColor;
+        }
+
+        .element-symbol {
+            font-size: 4em;
+            font-weight: bold;
+            margin: 20px 0;
+            opacity: 0.8;
+        }
+
+        .element-description {
+            font-size: 1.2em;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .share-btn {
+            background: linear-gradient(45deg, #ff6b35, #f7941d);
+            margin: 10px;
+            display: inline-block;
+        }
+
+        .restart-btn {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: auto;
+            opacity: 0.7;
+            font-size: 0.9em;
+        }
+
+        .footer a {
+            color: #00f5ff;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer a:hover {
+            color: #8a2be2;
+            text-shadow: 0 0 10px currentColor;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes zoomIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 30px rgba(0, 245, 255, 0.3); }
+            50% { transform: scale(1.05); box-shadow: 0 0 50px rgba(0, 245, 255, 0.5); }
+        }
+
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: rgba(0, 245, 255, 0.6);
+            border-radius: 50%;
+            animation: float 6s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-20px) rotate(360deg); opacity: 0; }
+        }
+
+        .question-counter {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 600px) {
+            .container { padding: 15px; }
+            h1 { font-size: 2em; }
+            .quiz-container { padding: 25px; }
+            .element-name { font-size: 2em; }
+            .element-symbol { font-size: 3em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+    
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <img src="logo.png" alt="BioProtocol Logo" onerror="this.style.display='none'; this.parentNode.innerHTML='🧬';">
+            </div>
+            <h1>Which BioProtocol Element Are You?</h1>
+            <div class="subtitle">Discover your scientific personality and find your BioProtocol element!</div>
+        </div>
+
+        <div class="quiz-container">
+            <!-- Quiz Questions -->
+            <div class="question-counter">
+                <span id="current-question">1</span> / <span id="total-questions">10</span>
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill" style="width: 10%"></div>
+            </div>
+
+            <div class="question active" data-question="1">
+                <h3>Which upcoming BioDAO excites you the most?</h3>
+                <div class="options">
+                    <div class="option" data-value="A">🔬 Quantum Biology DAO - Advanced quantum microscopes for biological research</div>
+                    <div class="option" data-value="B">🫁 Long COVID Labs - Developing treatments for Long COVID patients</div>
+                    <div class="option" data-value="C">💊 Curetopia - First Solana-native BioDAO for rare diseases</div>
+                    <div class="option" data-value="D">🍄 MycoDAO - Fungi-focused decentralized research collective</div>
+                </div>
+            </div>
+
+            <div class="question" data-question="2">
+                <h3>What's your main motivation for joining the BioProtocol ecosystem?</h3>
+                <div class="options">
+                    <div class="option" data-value="A">🚀 Accelerating scientific breakthroughs with cutting-edge tech</div>
+                    <div class="option" data-value="B">🤝 Collaborative research and community-driven science</div>
+                    <div class="option" data-value="C">💰 IP tokenization and sustainable DeSci economics</div>
+                    <div class="option" data-value="D">🎯 Solving specific medical problems and helping patients</div>
+                </div>
+            </div>
+
+            <div class="question" data-question="3">
+                <h3>Which $BIO token utility excites you most?</h3>
+                <div class="options">
+                    <div class="option" data-value="A">⚡ Voting on new BioDAO selections in the launchpad</div>
+                    <div class="option" data-value="B">🔬 Early access to breakthrough research projects</div>
+                    <div class="option" data-value="C">💎 Governance rights and meta-governance across BioDAOs</div>
+                    <div class="option" data-value="D">🏆 Bio/Acc rewards for contributing to research milestones</div>
+                </div>
+            </div>
+
+            <div class="question" data-question="4">
+                <h3>What's the biggest advantage of BioAgents (AI-powered scientific agents)?</h3>
+                <div class="options">
+                    <div class="option" data-value="A">🤖 Automating hypothesis generation and experiment design</div>
+                    <div class="option" data-value="B">📊 Collaborative data analysis across global research teams</div>
+                    <div class="option" data-value="C">💹 Optimizing tokenomics and funding allocation</div>
+                    <div class="option" data-value="D">🧪 Supporting clinical trials and patient data management</div>
+                </div>
+            </div>
+
+            <div class="question" data-question="5">
+                <h3>Which established BioDAO inspires you the most?</h3>
+                <div class="options">
+                    <div class="option" data-value="A">🧬 VitaDAO - Pioneer in longevity science with $5M+ funded</div>
+                    <div class="option" data-value="B">🧠 CerebrumDAO - Rapid growth in neuroscience, raised $2.1M</div>
+                    <div class="option" data-value="C">💡 ValleyDAO - Synthetic biology innovations, raised $2M+</div>
+                    <div class="option" data-value="D">💇 HairDAO - First DAO patent holder with consumer products</div>
+                </div>
+            </div>
+
+            <div class="question" data-question="6">
+                <h3>What's most exciting about IP-NFTs in the BioProtocol ecosystem?</h3>
+                <div class="options">
+                    <div class="option" data-value="A">🌐 Democratizing access to cutting-edge scientific IP</div>
+                    <div class="option" data-value="B">🔗 Transparent, blockchain-secured research collaboration</div>
+                    <div class="option" data-value="C">💹 Creating liquid markets for tokenized research assets</div>
+                    <div class="option" data-value="D">🏛️ Open science model with patent-to-public pathways</div>
+                </div>
+            </div>
+
+            <div class="question" data-question="7">
+                <h3>Which Bio V2 feature are you most excited about?</h3>
+                <div class="options">
+                    <div class="option" data-value="A">🔥 BioAgent Launchpad for AI-powered research tools</div>
+                    <div class="option" data-value="B">🤝 Enhanced community curation and collaboration tools</div>
+                    <div class="option" data-value="C">💰 Advanced liquidity engine and cross-chain support</div>
+                    <div class="option" data-value="D">📈 BioXP rewards system for research contributions</div>
+                </div>
+            </div>
+
+            <div class="question" data-question="8">
+                <h3>What makes BioProtocol's launchpad revolutionary?</h3>
+                <div class="options">
+                    <div class="option" data-value="A">⚡ Fair launches via bonding curves and automated systems</div>
+                    <div class="option" data-value="B">🌍 Global community participation in research funding</div>
+                    <div class="option" data-value="C">💎 Instant liquidity provision for new BioDAO tokens</div>
+                    <div class="option" data-value="D">🔬 Focus on solving real-world medical challenges</div>
+                </div>
+            </div>
+
+            <div class="question" data-question="9">
+                <h3>Which aspect of DeSci (Decentralized Science) matters most?</h3>
+                <div class="options">
+                    <div class="option" data-value="A">🚀 Speed - Accelerating discoveries from decades to months</div>
+                    <div class="option" data-value="B">🌍 Access - Global collaboration without institutional barriers</div>
+                    <div class="option" data-value="C">💰 Economics - Sustainable funding models for research</div>
+                    <div class="option" data-value="D">🔓 Openness - Transparent and ethical scientific practices</div>
+                </div>
+            </div>
+
+            <div class="question" data-question="10">
+                <h3>How would you contribute to the BioProtocol ecosystem?</h3>
+                <div class="options">
+                    <div class="option" data-value="A">⚡ Developing breakthrough technologies and innovations</div>
+                    <div class="option" data-value="B">🤝 Building communities and fostering collaboration</div>
+                    <div class="option" data-value="C">💰 Providing liquidity and managing tokenomics</div>
+                    <div class="option" data-value="D">🎯 Contributing clinical expertise and patient advocacy</div>
+                </div>
+            </div>
+
+            <button class="btn" id="next-btn" onclick="nextQuestion()" style="display: none;">Next Question</button>
+        </div>
+
+        <!-- Result Screen -->
+        <div class="result" id="result">
+            <div class="element-card" id="element-card">
+                <div class="element-name" id="element-name"></div>
+                <div class="element-symbol" id="element-symbol"></div>
+                <div class="element-description" id="element-description"></div>
+            </div>
+            <button class="btn share-btn" onclick="shareResult()">🔗 Share Result</button>
+            <button class="btn restart-btn" onclick="restartQuiz()">🔄 Try Again</button>
+        </div>
+
+        <div class="footer">
+            Created by <a href="https://x.com/0xAybars" target="_blank"><strong>@0xAybars</strong></a> /EarlyX with ❤️ for the BioProtocol Community
+        </div>
+    </div>
+
+    <script>
+        let currentQuestion = 1;
+        let totalQuestions = 10;
+        let answers = [];
+        
+        const elements = {
+            'A': {
+                name: 'QUANTUM-BIO',
+                symbol: 'QB',
+                color: '#00f5ff',
+                description: 'You are a cutting-edge innovator! As the Quantum-Bio element, you\'re passionate about breakthrough technologies and revolutionary approaches to science. In the BioProtocol ecosystem, you\'re the type to back quantum microscopy projects, AI-powered BioAgents, and accelerate research from decades to months. Your element thrives on pushing the boundaries of what\'s possible in DeSci! 🔬⚛️'
+            },
+            'B': {
+                name: 'CARBON-BIO',
+                symbol: 'CB',
+                color: '#8a2be2',
+                description: 'You are a community builder and connector! As the Carbon-Bio element, just like carbon forms the backbone of life, you form the backbone of the BioProtocol community. You excel at fostering collaboration between scientists, patients, and researchers across global BioDAOs. You\'re the glue that holds the ecosystem together, building bridges and enabling breakthrough discoveries through collective action! 🤝💜'
+            },
+            'C': {
+                name: 'LIQUIDITY-BIO',
+                symbol: 'LB',
+                color: '#ff6b35',
+                description: 'You are a DeFi mastermind and economic architect! As the Liquidity-Bio element, you understand the tokenomics that power the BioProtocol ecosystem. You\'re excited about IP tokenization, cross-chain liquidity, and creating sustainable economic models for DeSci. You help transform breakthrough research into valuable, liquid assets that benefit the entire community! 💰🔥'
+            },
+            'D': {
+                name: 'THERAPEUTIC-BIO',
+                symbol: 'TB',
+                color: '#4ecdc4',
+                description: 'You are a mission-driven problem solver! As the Therapeutic-Bio element, you\'re focused on translating research into real-world medical solutions. You\'re drawn to BioDAOs like Curetopia for rare diseases, Long COVID Labs, and projects that directly help patients. Your element ensures that all the innovation in the ecosystem ultimately serves humanity and improves lives! 🏥💚'
+            }
+        };
+
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 3 + 4) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        function selectOption(element) {
+            const options = document.querySelectorAll('.question.active .option');
+            options.forEach(opt => opt.classList.remove('selected'));
+            element.classList.add('selected');
+            
+            answers[currentQuestion - 1] = element.getAttribute('data-value');
+            
+            // Auto advance after a short delay
+            setTimeout(() => {
+                nextQuestion();
+            }, 800);
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < totalQuestions) {
+                document.querySelector('.question.active').classList.remove('active');
+                currentQuestion++;
+                document.querySelector(`[data-question="${currentQuestion}"]`).classList.add('active');
+                document.getElementById('current-question').textContent = currentQuestion;
+                updateProgressBar();
+            } else {
+                showResult();
+            }
+        }
+
+        function updateProgressBar() {
+            const progress = (currentQuestion / totalQuestions) * 100;
+            document.getElementById('progress-fill').style.width = progress + '%';
+        }
+
+        function showResult() {
+            const answerCounts = { A: 0, B: 0, C: 0, D: 0 };
+            answers.forEach(answer => {
+                if (answer) answerCounts[answer]++;
+            });
+            
+            let resultElement = 'A'; // default
+            let maxCount = 0;
+            for (let key in answerCounts) {
+                if (answerCounts[key] > maxCount) {
+                    maxCount = answerCounts[key];
+                    resultElement = key;
+                }
+            }
+            
+            const element = elements[resultElement];
+            document.querySelector('.quiz-container').style.display = 'none';
+            
+            const resultDiv = document.getElementById('result');
+            const elementCard = document.getElementById('element-card');
+            
+            document.getElementById('element-name').textContent = element.name;
+            document.getElementById('element-symbol').textContent = element.symbol;
+            document.getElementById('element-description').textContent = element.description;
+            
+            elementCard.style.borderColor = element.color;
+            elementCard.style.boxShadow = `0 0 40px ${element.color}50`;
+            document.getElementById('element-name').style.color = element.color;
+            document.getElementById('element-symbol').style.color = element.color;
+            
+            resultDiv.style.display = 'block';
+        }
+
+        function shareResult() {
+            const elementName = document.getElementById('element-name').textContent;
+            const elementDescription = elements[Object.keys(elements).find(key => elements[key].name === elementName)];
+            
+            // Create tweet text based on element
+            let tweetText = '';
+            switch(elementName) {
+                case 'QUANTUM-BIO':
+                    tweetText = `🚀 Just discovered I'm a QUANTUM-BIO element! I'm all about cutting-edge tech, AI-powered BioAgents, and pushing DeSci to the next level! Which BioProtocol element are you?`;
+                    break;
+                case 'CARBON-BIO':
+                    tweetText = `🤝 I'm a CARBON-BIO element! The community builder who connects scientists, researchers & patients in the BioProtocol ecosystem! Which element represents your DeSci spirit?`;
+                    break;
+                case 'LIQUIDITY-BIO':
+                    tweetText = `💰 Turns out I'm LIQUIDITY-BIO! The DeFi mastermind powering tokenomics and IP liquidity in the BioProtocol ecosystem! What's your element?`;
+                    break;
+                case 'THERAPEUTIC-BIO':
+                    tweetText = `🏥 I'm a THERAPEUTIC-BIO element! Mission-driven to transform research into real-world medical solutions! Take the quiz and find your BioProtocol element!`;
+                    break;
+                default:
+                    tweetText = `🧬 Just took the BioProtocol Element Quiz! Which element are you in the DeSci revolution?`;
+            }
+            
+            tweetText += ` #BioProtocol #DeSci #Biotech\n\nby @0xAybars`;
+            
+            // Open Twitter share page
+            const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(window.location.href)}`;
+            window.open(twitterUrl, '_blank');
+        }
+
+        function restartQuiz() {
+            currentQuestion = 1;
+            answers = [];
+            document.querySelector('.question.active').classList.remove('active');
+            document.querySelector('[data-question="1"]').classList.add('active');
+            document.getElementById('current-question').textContent = '1';
+            updateProgressBar();
+            document.getElementById('result').style.display = 'none';
+            document.querySelector('.quiz-container').style.display = 'block';
+            
+            // Clear all selections
+            document.querySelectorAll('.option.selected').forEach(opt => 
+                opt.classList.remove('selected')
+            );
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+            
+            document.querySelectorAll('.option').forEach(option => {
+                option.addEventListener('click', function() {
+                    selectOption(this);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
