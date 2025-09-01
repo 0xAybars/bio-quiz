@@ -485,11 +485,17 @@
         }
 
         function selectOption(element) {
+            // Clear previously selected options
             const options = document.querySelectorAll('.question.active .option');
             options.forEach(opt => opt.classList.remove('selected'));
             element.classList.add('selected');
             
+            // Save the answer
             answers[currentQuestion - 1] = element.getAttribute('data-value');
+            
+            // Debug: Log current answers
+            console.log('Answer saved:', element.getAttribute('data-value'), 'Question:', currentQuestion);
+            console.log('Current answers array:', answers);
             
             // Auto advance after a short delay
             setTimeout(() => {
@@ -515,20 +521,41 @@
         }
 
         function showResult() {
+            // Count answers
             const answerCounts = { A: 0, B: 0, C: 0, D: 0 };
-            answers.forEach(answer => {
-                if (answer) answerCounts[answer]++;
+            
+            // Debug: Log the answers array before counting
+            console.log('Final answers array:', answers);
+            
+            answers.forEach((answer, index) => {
+                console.log(`Question ${index + 1}: ${answer}`);
+                if (answer && answerCounts[answer] !== undefined) {
+                    answerCounts[answer]++;
+                }
             });
             
-            let resultElement = 'A'; // default
-            let maxCount = 0;
+            console.log('Answer counts:', answerCounts);
+            
+            // Find the most frequent answer
+            let resultElement = 'A'; // Default fallback
+            let maxCount = answerCounts['A']; // Start with A's count
+            
+            // Check all options to find the highest count
             for (let key in answerCounts) {
                 if (answerCounts[key] > maxCount) {
                     maxCount = answerCounts[key];
                     resultElement = key;
+                } else if (answerCounts[key] === maxCount && key !== 'A') {
+                    // In case of tie, prefer later letters (randomness)
+                    if (Math.random() > 0.5) {
+                        resultElement = key;
+                    }
                 }
             }
             
+            console.log('Result element:', resultElement, 'with count:', maxCount);
+            
+            // Display result
             const element = elements[resultElement];
             document.querySelector('.quiz-container').style.display = 'none';
             
@@ -579,7 +606,7 @@
 
         function restartQuiz() {
             currentQuestion = 1;
-            answers = [];
+            answers = []; // Clear answers array
             document.querySelector('.question.active').classList.remove('active');
             document.querySelector('[data-question="1"]').classList.add('active');
             document.getElementById('current-question').textContent = '1';
